@@ -1,0 +1,12 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity">
+
+    <item
+        android:id="@+id/action_mode"
+        android:title="夜间模式" />
+    <item
+        android:id="@+id/action_setting"
+        android:title="设置选项" />
+</menu>

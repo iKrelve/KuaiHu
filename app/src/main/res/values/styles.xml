@@ -1,0 +1,25 @@
+<resources>
+
+    <style name="AppBaseTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!--选中状态icon的颜色和字体颜色-->
+        <item name="colorPrimary">@android:color/holo_blue_bright</item>
+        <item name="colorPrimaryDark">@android:color/holo_blue_dark</item>
+        <item name="colorAccent">@android:color/holo_green_light</item>
+        <!--正常状态下字体颜色和icon颜色-->
+        <item name="android:textColorPrimary">@android:color/white</item>
+    </style>
+
+    <style name="MyActionBar" parent="ThemeOverlay.AppCompat.ActionBar">
+        <!--<item name="android:actionOverflowButtonStyle">@style/MyOverflowButton</item>-->
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="MyOverflowButton" parent="@android:style/Widget.Holo.ActionButton.Overflow">
+        <item name="android:src">@android:drawable/ic_menu_view</item>
+    </style>
+
+    <!-- Application theme. -->
+    <style name="AppTheme" parent="AppBaseTheme">
+        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+    </style>
+</resources>
