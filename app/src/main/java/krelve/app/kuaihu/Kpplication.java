@@ -24,6 +24,7 @@ public class Kpplication extends Application {
         initImageLoader(getApplicationContext());
     }
 
+
     private void initImageLoader(Context context) {
         File cacheDir = StorageUtils.getCacheDirectory(context);
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
@@ -36,6 +37,5 @@ public class Kpplication extends Application {
                 .diskCache(new UnlimitedDiskCache(cacheDir)).writeDebugLogs()
                 .build();
         ImageLoader.getInstance().init(config);
-
     }
 }

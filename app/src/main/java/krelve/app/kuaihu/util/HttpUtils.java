@@ -13,4 +13,7 @@ public class HttpUtils {
         client.get(Constant.BASEURL + url, responseHandler);
     }
 
+    public static void getImage(String url, ResponseHandlerInterface responseHandler) {
+        client.get(url, responseHandler);
+    }
 }

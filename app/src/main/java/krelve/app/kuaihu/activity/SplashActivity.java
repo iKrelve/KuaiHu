@@ -8,6 +8,7 @@ import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.BinaryHttpResponseHandler;
@@ -68,7 +69,7 @@ public class SplashActivity extends Activity {
                         try {
                             JSONObject jsonObject = new JSONObject(new String(bytes));
                             String url = jsonObject.getString("img");
-                            HttpUtils.get(url, new BinaryHttpResponseHandler() {
+                            HttpUtils.getImage(url, new BinaryHttpResponseHandler() {
                                 @Override
                                 public void onSuccess(int i, Header[] headers, byte[] bytes) {
                                     saveImage(imgFile, bytes);
@@ -112,7 +113,9 @@ public class SplashActivity extends Activity {
 
     public void saveImage(File file, byte[] bytes) {
         try {
-            file.delete();
+            if (file.exists()){
+                file.delete();
+            }
             FileOutputStream fos = new FileOutputStream(file);
             fos.write(bytes);
             fos.flush();

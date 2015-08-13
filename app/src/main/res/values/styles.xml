@@ -10,7 +10,6 @@
     </style>
 
     <style name="MyActionBar" parent="ThemeOverlay.AppCompat.ActionBar">
-        <!--<item name="android:actionOverflowButtonStyle">@style/MyOverflowButton</item>-->
         <item name="android:textColor">@android:color/black</item>
     </style>
 
