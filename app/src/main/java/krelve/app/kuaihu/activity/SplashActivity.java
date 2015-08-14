@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.Window;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
@@ -35,6 +36,7 @@ public class SplashActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.splash);
         iv_start = (ImageView) findViewById(R.id.iv_start);
         initImage();
@@ -113,7 +115,7 @@ public class SplashActivity extends Activity {
 
     public void saveImage(File file, byte[] bytes) {
         try {
-            if (file.exists()){
+            if (file.exists()) {
                 file.delete();
             }
             FileOutputStream fos = new FileOutputStream(file);

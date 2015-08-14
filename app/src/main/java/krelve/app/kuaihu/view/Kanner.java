@@ -43,6 +43,7 @@ public class Kanner extends FrameLayout implements OnClickListener {
         super(context, attrs, defStyle);
         mImageLoader = ImageLoader.getInstance();
         this.context = context;
+        this.topStoriesEntities = new ArrayList<>();
         initView();
     }
 
@@ -95,7 +96,7 @@ public class Kanner extends FrameLayout implements OnClickListener {
             ImageView iv = (ImageView) fm.findViewById(R.id.iv_title);
             TextView tv_title = (TextView) fm.findViewById(R.id.tv_title);
             iv.setScaleType(ScaleType.CENTER_CROP);
-            iv.setBackgroundResource(R.drawable.loading1);
+//            iv.setBackgroundResource(R.drawable.loading1);
             if (i == 0) {
                 mImageLoader.displayImage(topStoriesEntities.get(len - 1).getImage(), iv);
                 tv_title.setText(topStoriesEntities.get(len - 1).getTitle());

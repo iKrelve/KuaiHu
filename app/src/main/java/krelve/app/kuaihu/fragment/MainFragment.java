@@ -13,13 +13,14 @@ import com.loopj.android.http.TextHttpResponseHandler;
 
 import org.apache.http.Header;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import krelve.app.kuaihu.R;
 import krelve.app.kuaihu.activity.MainActivity;
-import krelve.app.kuaihu.adapter.NewsItemAdapter;
+import krelve.app.kuaihu.adapter.MainNewsItemAdapter;
+import krelve.app.kuaihu.model.Before;
 import krelve.app.kuaihu.model.Latest;
+import krelve.app.kuaihu.model.StoriesEntity;
 import krelve.app.kuaihu.util.Constant;
 import krelve.app.kuaihu.util.HttpUtils;
 import krelve.app.kuaihu.view.Kanner;
@@ -29,9 +30,12 @@ import krelve.app.kuaihu.view.Kanner;
  */
 public class MainFragment extends BaseFragment {
     private ListView lv_news;
-    private List<Latest> items;
+    private MainNewsItemAdapter mAdapter;
     private Latest latest;
+    private Before before;
     private Kanner kanner;
+    private String date;
+    private boolean isLoading = false;
     private Handler handler = new Handler();
 
     @Override
@@ -47,6 +51,8 @@ public class MainFragment extends BaseFragment {
             }
         });
         lv_news.addHeaderView(header);
+        mAdapter = new MainNewsItemAdapter(mActivity);
+        lv_news.setAdapter(mAdapter);
         lv_news.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
@@ -58,15 +64,19 @@ public class MainFragment extends BaseFragment {
                 if (lv_news != null && lv_news.getChildCount() > 0) {
                     boolean enable = (firstVisibleItem == 0) && (view.getChildAt(firstVisibleItem).getTop() == 0);
                     ((MainActivity) mActivity).setSwipeRefreshEnable(enable);
+
+                    if (firstVisibleItem + visibleItemCount == totalItemCount && !isLoading) {
+                        loadMore(Constant.BEFORE + date);
+                    }
                 }
+
             }
         });
         return view;
     }
 
-    @Override
-    protected void initData() {
-        super.initData();
+    private void loadFirst() {
+        isLoading = true;
         HttpUtils.get(Constant.LATESTNEWS, new TextHttpResponseHandler() {
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
@@ -76,21 +86,68 @@ public class MainFragment extends BaseFragment {
             public void onSuccess(int statusCode, Header[] headers, String responseString) {
                 Gson gson = new Gson();
                 latest = gson.fromJson(responseString, Latest.class);
+                date = latest.getDate();
                 kanner.setTopEntities(latest.getTop_stories());
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        List<Latest.StoriesEntity> storiesEntities = latest.getStories();
-                        Latest.StoriesEntity topic = new Latest.StoriesEntity();
+                        List<StoriesEntity> storiesEntities = latest.getStories();
+                        StoriesEntity topic = new StoriesEntity();
                         topic.setType(Constant.TOPIC);
                         topic.setTitle("今日热闻");
                         storiesEntities.add(0, topic);
-                        lv_news.setAdapter(new NewsItemAdapter(mActivity, storiesEntities));
+                        mAdapter.addList(storiesEntities);
+                        isLoading = false;
                     }
                 });
             }
 
         });
+    }
+
+    private void loadMore(final String url) {
+        isLoading = true;
+        HttpUtils.get(url, new TextHttpResponseHandler() {
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+            }
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, String responseString) {
+                Gson gson = new Gson();
+                before = gson.fromJson(responseString, Before.class);
+                date = before.getDate();
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        List<StoriesEntity> storiesEntities = before.getStories();
+                        StoriesEntity topic = new StoriesEntity();
+                        topic.setType(Constant.TOPIC);
+                        topic.setTitle(convertDate(date));
+                        storiesEntities.add(0, topic);
+                        mAdapter.addList(storiesEntities);
+                        isLoading = false;
+                    }
+                });
+            }
+
+        });
+    }
+
+    @Override
+    protected void initData() {
+        super.initData();
+        loadFirst();
+    }
+
+    private String convertDate(String date) {
+        String result = date.substring(0, 4);
+        result += "年";
+        result += date.substring(4, 6);
+        result += "月";
+        result += date.substring(6, 8);
+        result += "日";
+        return result;
     }
 
 }

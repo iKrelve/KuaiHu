@@ -22,18 +22,27 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout mDrawerLayout;
     private SwipeRefreshLayout sr;
     private long firstTime;
+    private String curId;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
-        initData();
-
+        loadLatest();
     }
 
-    private void initData() {
-        getSupportFragmentManager().beginTransaction().replace(R.id.fl_content, new MainFragment()).commit();
+    public void loadLatest() {
+        getSupportFragmentManager().beginTransaction().
+                setCustomAnimations(R.anim.slide_in_from_right, R.anim.slide_out_to_left).
+                replace(R.id.fl_content, new MainFragment(), "latest").
+                commit();
+        curId = "latest";
+    }
+
+    public void setCurId(String id) {
+        curId = id;
     }
 
     private void initView() {
@@ -44,12 +53,35 @@ public class MainActivity extends AppCompatActivity {
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
+
+        sr.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                replaceFragment();
+                sr.setRefreshing(false);
+            }
+        });
         fl_content = (FrameLayout) findViewById(R.id.fl_content);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawerlayout);
         final ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
                 toolbar, R.string.app_name, R.string.app_name);
         mDrawerLayout.setDrawerListener(drawerToggle);
         drawerToggle.syncState();
+    }
+
+    public void replaceFragment() {
+        if (curId.equals("latest")) {
+            getSupportFragmentManager().beginTransaction().setCustomAnimations(R.anim.slide_in_from_right, R.anim.slide_out_to_left)
+                    .replace(R.id.fl_content,
+                            new MainFragment(), "latest").commit();
+        } else {
+
+        }
+
+    }
+
+    public void closeMenu() {
+        mDrawerLayout.closeDrawers();
     }
 
     public void setSwipeRefreshEnable(boolean enable) {
@@ -72,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if (mDrawerLayout.isDrawerOpen(Gravity.LEFT)) {
-            mDrawerLayout.closeDrawers();
+            closeMenu();
         } else {
             long secondTime = System.currentTimeMillis();
             if (secondTime - firstTime > 2000) {

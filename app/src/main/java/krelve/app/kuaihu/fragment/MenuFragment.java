@@ -1,6 +1,5 @@
 package krelve.app.kuaihu.fragment;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -9,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -24,11 +24,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import krelve.app.kuaihu.R;
+import krelve.app.kuaihu.activity.MainActivity;
 import krelve.app.kuaihu.model.NewsListItem;
 import krelve.app.kuaihu.util.Constant;
 import krelve.app.kuaihu.util.HttpUtils;
 
-public class MenuFragment extends Fragment implements OnClickListener {
+public class MenuFragment extends BaseFragment implements OnClickListener {
     private ListView lv_item;
     private TextView tv_download, tv_main;
     // private static String[] ITEMS = { "日常心理学", "用户推荐日报", "电影日报", "不许无聊",
@@ -38,35 +39,34 @@ public class MenuFragment extends Fragment implements OnClickListener {
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater,
-                             @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    protected View initView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.menu, container, false);
         tv_download = (TextView) view.findViewById(R.id.tv_download);
         tv_download.setOnClickListener(this);
         tv_main = (TextView) view.findViewById(R.id.tv_main);
         tv_main.setOnClickListener(this);
         lv_item = (ListView) view.findViewById(R.id.lv_item);
-//		lv_item.setOnItemClickListener(new OnItemClickListener() {
-//
-//			@Override
-//			public void onItemClick(AdapterView<?> parent, View view,
-//					int position, long id) {
-//				getFragmentManager()
-//						.beginTransaction()
-//						.replace(
-//								R.id.fl_content,
-//								new ThemeNewsFragment(items.get(position)
-//										.getId()), "news").commit();
-//				((MainActivity) getActivity()).setCurID(items.get(position)
-//						.getId());
-//				((MainActivity) getActivity()).toggle();
-//			}
-//		});
-        getItems();
+        lv_item.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+                getFragmentManager()
+                        .beginTransaction().setCustomAnimations(R.anim.slide_in_from_right, R.anim.slide_out_to_left)
+                        .replace(
+                                R.id.fl_content,
+                                new NewsFragment(items.get(position)
+                                        .getId()), "news").commit();
+                ((MainActivity) mActivity).setCurId(items.get(position).getId());
+                ((MainActivity) mActivity).closeMenu();
+            }
+        });
         return view;
     }
 
-    private void getItems() {
+    @Override
+    protected void initData() {
+        super.initData();
         items = new ArrayList<NewsListItem>();
         HttpUtils.get(Constant.THEMES, new JsonHttpResponseHandler() {
             @Override
@@ -92,8 +92,6 @@ public class MenuFragment extends Fragment implements OnClickListener {
                 }
             }
         });
-
-
     }
 
     public class NewsTypeAdapter extends BaseAdapter {
@@ -128,6 +126,12 @@ public class MenuFragment extends Fragment implements OnClickListener {
 
     @Override
     public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.tv_main:
+                ((MainActivity) mActivity).loadLatest();
+                ((MainActivity) mActivity).closeMenu();
+                break;
+        }
 //        switch (v.getId()) {
 //            case R.id.tv_download:
 //                String CurID = ((MainActivity) getActivity()).getCurID();
