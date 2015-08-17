@@ -1,11 +1,12 @@
 package krelve.app.kuaihu.activity;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.webkit.WebView;
 import android.widget.ImageView;
 
@@ -20,20 +21,26 @@ import krelve.app.kuaihu.model.Content;
 import krelve.app.kuaihu.model.StoriesEntity;
 import krelve.app.kuaihu.util.Constant;
 import krelve.app.kuaihu.util.HttpUtils;
+import krelve.app.kuaihu.view.RevealBackgroundView;
 
 /**
  * Created by wwjun.wang on 2015/8/17.
  */
-public class LatestContentActivity extends AppCompatActivity {
+public class LatestContentActivity extends AppCompatActivity implements RevealBackgroundView.OnStateChangeListener {
     private WebView mWebView;
     private StoriesEntity entity;
     private Content content;
     private ImageView iv;
+    private RevealBackgroundView vRevealBackground;
+    private CoordinatorLayout coordinatorLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.latest_content_layout);
+        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
+        coordinatorLayout.setVisibility(View.INVISIBLE);
+        vRevealBackground = (RevealBackgroundView) findViewById(R.id.revealBackgroundView);
         entity = (StoriesEntity) getIntent().getSerializableExtra("entity");
         iv = (ImageView) findViewById(R.id.iv);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -69,5 +76,31 @@ public class LatestContentActivity extends AppCompatActivity {
                 mWebView.loadDataWithBaseURL("x-data://base", html, "text/html", "UTF-8", null);
             }
         });
+        setupRevealBackground(savedInstanceState);
+    }
+
+
+    private void setupRevealBackground(Bundle savedInstanceState) {
+        vRevealBackground.setOnStateChangeListener(this);
+        if (savedInstanceState == null) {
+            final int[] startingLocation = getIntent().getIntArrayExtra(Constant.START_LOCATION);
+            vRevealBackground.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    vRevealBackground.getViewTreeObserver().removeOnPreDrawListener(this);
+                    vRevealBackground.startFromLocation(startingLocation);
+                    return true;
+                }
+            });
+        } else {
+            vRevealBackground.setToFinishedFrame();
+        }
+    }
+
+    @Override
+    public void onStateChange(int state) {
+        if (RevealBackgroundView.STATE_FINISHED == state) {
+            coordinatorLayout.setVisibility(View.VISIBLE);
+        }
     }
 }

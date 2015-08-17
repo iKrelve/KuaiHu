@@ -12,4 +12,6 @@ public class Constant {
     public static final String THEMENEWS = "theme/";
     public static final String CONTENT = "news/";
     public static final int TOPIC = 131;
+    public static final String START_LOCATION = "start_location";
+
 }

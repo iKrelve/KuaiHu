@@ -79,10 +79,15 @@ public class MainFragment extends BaseFragment {
         lv_news.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                int[] startingLocation = new int[2];
+                view.getLocationOnScreen(startingLocation);
+                startingLocation[0] += view.getWidth() / 2;
                 StoriesEntity entity = (StoriesEntity) parent.getAdapter().getItem(position);
                 Intent intent = new Intent(mActivity, LatestContentActivity.class);
-                intent.putExtra("entity",entity);
+                intent.putExtra(Constant.START_LOCATION, startingLocation);
+                intent.putExtra("entity", entity);
                 startActivity(intent);
+                mActivity.overridePendingTransition(0, 0);
             }
         });
         return view;

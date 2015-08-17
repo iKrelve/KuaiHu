@@ -11,6 +11,7 @@
         <item name="colorAccent">@android:color/holo_green_light</item>
         <!--正常状态下字体颜色和icon颜色-->
         <item name="android:textColorPrimary">@android:color/white</item>
+
     </style>
 
     <style name="MyActionBar" parent="ThemeOverlay.AppCompat.ActionBar">
@@ -25,6 +26,10 @@
         <item name="android:textSize">20sp</item>
     </style>
 
+    <style name="AppTheme.TransparentActivity" parent="AppBaseTheme">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
 
     <!-- Application theme. -->
     <style name="AppTheme" parent="AppBaseTheme">
