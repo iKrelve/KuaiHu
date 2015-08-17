@@ -10,6 +10,6 @@ public class Constant {
     public static final String LATESTNEWS = "news/latest";
     public static final String BEFORE = "news/before/";
     public static final String THEMENEWS = "theme/";
-
+    public static final String CONTENT = "news/";
     public static final int TOPIC = 131;
 }

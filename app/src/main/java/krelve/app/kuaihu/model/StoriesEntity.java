@@ -1,11 +1,12 @@
 package krelve.app.kuaihu.model;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Created by wwjun.wang on 2015/8/14.
  */
-public class StoriesEntity {
+public class StoriesEntity implements Serializable{
     /**
      * id : 7047795
      * title : 央视说要干预男男性行为，具体是怎么干预法？

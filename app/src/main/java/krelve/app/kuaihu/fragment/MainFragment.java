@@ -1,12 +1,15 @@
 package krelve.app.kuaihu.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.loopj.android.http.TextHttpResponseHandler;
@@ -16,6 +19,7 @@ import org.apache.http.Header;
 import java.util.List;
 
 import krelve.app.kuaihu.R;
+import krelve.app.kuaihu.activity.LatestContentActivity;
 import krelve.app.kuaihu.activity.MainActivity;
 import krelve.app.kuaihu.adapter.MainNewsItemAdapter;
 import krelve.app.kuaihu.model.Before;
@@ -70,6 +74,15 @@ public class MainFragment extends BaseFragment {
                     }
                 }
 
+            }
+        });
+        lv_news.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                StoriesEntity entity = (StoriesEntity) parent.getAdapter().getItem(position);
+                Intent intent = new Intent(mActivity, LatestContentActivity.class);
+                intent.putExtra("entity",entity);
+                startActivity(intent);
             }
         });
         return view;
