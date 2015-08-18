@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#FFF0F0F0"
+    android:background="@color/light_news_item"
     android:orientation="vertical">
 
     <FrameLayout
@@ -12,7 +12,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginTop="8dp"
-        android:background="@drawable/item_background_selector"
+        android:background="@drawable/item_background_selector_light"
         android:orientation="horizontal">
 
         <TextView
@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
             android:text="今日热闻"
-            android:textColor="#ff666666"
+            android:textColor="@color/light_news_topic"
             android:textSize="13sp"
             android:visibility="gone" />
 
@@ -36,9 +36,9 @@
                 android:id="@+id/iv_title"
                 android:layout_width="80dp"
                 android:layout_height="70dp"
-                android:scaleType="fitXY"
+                android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:layout_alignParentRight="true" />
+                android:scaleType="fitXY" />
 
             <TextView
                 android:id="@+id/tv_title"
@@ -47,8 +47,8 @@
                 android:layout_alignParentLeft="true"
                 android:layout_toLeftOf="@id/iv_title"
                 android:padding="5dp"
-                android:textSize="18sp"
-                android:text="如何看待当下这种越来越普遍的“沉默”人格？" />
+                android:text="如何看待当下这种越来越普遍的“沉默”人格？"
+                android:textSize="18sp" />
         </RelativeLayout>
 
     </FrameLayout>

@@ -32,6 +32,7 @@
     </android.support.v4.widget.SwipeRefreshLayout>
 
     <fragment
+        android:id="@+id/menu_fragment"
         android:name="krelve.app.kuaihu.fragment.MenuFragment"
         android:layout_width="300dp"
         android:layout_height="match_parent"

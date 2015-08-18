@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import krelve.app.kuaihu.R;
+import krelve.app.kuaihu.activity.MainActivity;
 import krelve.app.kuaihu.model.StoriesEntity;
 import krelve.app.kuaihu.util.Constant;
 
@@ -25,10 +27,12 @@ public class NewsItemAdapter extends BaseAdapter {
     private List<StoriesEntity> entities;
     private Context context;
     private ImageLoader mImageloader;
+    private boolean isLight;
 
     public NewsItemAdapter(Context context, List<StoriesEntity> items) {
         this.context = context;
         entities = items;
+        isLight = ((MainActivity) context).isLight();
         mImageloader = ImageLoader.getInstance();
     }
 
@@ -59,16 +63,24 @@ public class NewsItemAdapter extends BaseAdapter {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
+        ((LinearLayout) viewHolder.iv_title.getParent().getParent().getParent()).setBackgroundColor(context.getResources().getColor(isLight ? R.color.light_news_item : R.color.dark_news_item));
+        viewHolder.tv_title.setTextColor(context.getResources().getColor(isLight ? android.R.color.black : android.R.color.white));
+        ((FrameLayout) viewHolder.tv_title.getParent().getParent()).setBackgroundResource(isLight ? R.drawable.item_background_selector_light : R.drawable.item_background_selector_dark);
         StoriesEntity entity = entities.get(position);
         viewHolder.tv_title.setText(entity.getTitle());
         if (entity.getImages() != null) {
             viewHolder.iv_title.setVisibility(View.VISIBLE);
             mImageloader.displayImage(entity.getImages().get(0), viewHolder.iv_title);
-        }else{
+        } else {
             viewHolder.iv_title.setVisibility(View.GONE);
         }
         return convertView;
 
+    }
+
+    public void updateTheme() {
+        isLight = ((MainActivity) context).isLight();
+        notifyDataSetChanged();
     }
 
     public static class ViewHolder {

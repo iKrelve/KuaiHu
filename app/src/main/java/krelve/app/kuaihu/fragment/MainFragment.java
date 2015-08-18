@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.loopj.android.http.TextHttpResponseHandler;
@@ -50,8 +49,19 @@ public class MainFragment extends BaseFragment {
         kanner = (Kanner) header.findViewById(R.id.kanner);
         kanner.setOnItemClickListener(new Kanner.OnItemClickListener() {
             @Override
-            public void click(Latest.TopStoriesEntity entity) {
-
+            public void click(View v, Latest.TopStoriesEntity entity) {
+                int[] startingLocation = new int[2];
+                v.getLocationOnScreen(startingLocation);
+                startingLocation[0] += v.getWidth() / 2;
+                StoriesEntity storiesEntity = new StoriesEntity();
+                storiesEntity.setId(entity.getId());
+                storiesEntity.setTitle(entity.getTitle());
+                Intent intent = new Intent(mActivity, LatestContentActivity.class);
+                intent.putExtra(Constant.START_LOCATION, startingLocation);
+                intent.putExtra("entity", storiesEntity);
+                intent.putExtra("isLight", ((MainActivity) mActivity).isLight());
+                startActivity(intent);
+                mActivity.overridePendingTransition(0, 0);
             }
         });
         lv_news.addHeaderView(header);
@@ -86,6 +96,7 @@ public class MainFragment extends BaseFragment {
                 Intent intent = new Intent(mActivity, LatestContentActivity.class);
                 intent.putExtra(Constant.START_LOCATION, startingLocation);
                 intent.putExtra("entity", entity);
+                intent.putExtra("isLight", ((MainActivity) mActivity).isLight());
                 startActivity(intent);
                 mActivity.overridePendingTransition(0, 0);
             }
@@ -168,4 +179,7 @@ public class MainFragment extends BaseFragment {
         return result;
     }
 
+    public void updateTheme() {
+        mAdapter.updateTheme();
+    }
 }

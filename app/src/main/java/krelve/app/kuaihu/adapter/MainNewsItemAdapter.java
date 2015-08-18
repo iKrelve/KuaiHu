@@ -1,12 +1,14 @@
 package krelve.app.kuaihu.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -15,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import krelve.app.kuaihu.R;
+import krelve.app.kuaihu.activity.MainActivity;
 import krelve.app.kuaihu.model.StoriesEntity;
 import krelve.app.kuaihu.util.Constant;
 
@@ -25,11 +28,13 @@ public class MainNewsItemAdapter extends BaseAdapter {
     private List<StoriesEntity> entities;
     private Context context;
     private ImageLoader mImageloader;
+    private boolean isLight;
 
     public MainNewsItemAdapter(Context context) {
         this.context = context;
         this.entities = new ArrayList<>();
         mImageloader = ImageLoader.getInstance();
+        isLight = ((MainActivity) context).isLight();
     }
 
     public void addList(List<StoriesEntity> items) {
@@ -65,15 +70,18 @@ public class MainNewsItemAdapter extends BaseAdapter {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
+        ((LinearLayout) viewHolder.iv_title.getParent().getParent().getParent()).setBackgroundColor(context.getResources().getColor(isLight ? R.color.light_news_item : R.color.dark_news_item));
+        viewHolder.tv_topic.setTextColor(context.getResources().getColor(isLight ? R.color.light_news_topic : R.color.dark_news_topic));
+        viewHolder.tv_title.setTextColor(context.getResources().getColor(isLight ? android.R.color.black : android.R.color.white));
         StoriesEntity entity = entities.get(position);
         if (entity.getType() == Constant.TOPIC) {
-            ((FrameLayout) viewHolder.tv_topic.getParent()).setBackgroundColor(context.getResources().getColor(R.color.list_background));
+            ((FrameLayout) viewHolder.tv_topic.getParent()).setBackgroundColor(Color.TRANSPARENT);
             viewHolder.tv_title.setVisibility(View.GONE);
             viewHolder.iv_title.setVisibility(View.GONE);
             viewHolder.tv_topic.setVisibility(View.VISIBLE);
             viewHolder.tv_topic.setText(entity.getTitle());
         } else {
-            ((FrameLayout) viewHolder.tv_topic.getParent()).setBackgroundResource(R.drawable.item_background_selector);
+            ((FrameLayout) viewHolder.tv_topic.getParent()).setBackgroundResource(isLight ? R.drawable.item_background_selector_light : R.drawable.item_background_selector_dark);
             viewHolder.tv_topic.setVisibility(View.GONE);
             viewHolder.tv_title.setVisibility(View.VISIBLE);
             viewHolder.iv_title.setVisibility(View.VISIBLE);
@@ -83,9 +91,15 @@ public class MainNewsItemAdapter extends BaseAdapter {
         return convertView;
     }
 
+    public void updateTheme() {
+        isLight = ((MainActivity) context).isLight();
+        notifyDataSetChanged();
+    }
+
     public static class ViewHolder {
         TextView tv_topic;
         TextView tv_title;
         ImageView iv_title;
     }
+
 }

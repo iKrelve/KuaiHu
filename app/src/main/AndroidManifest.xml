@@ -25,6 +25,9 @@
         <activity
             android:name=".activity.LatestContentActivity"
             android:theme="@style/AppTheme.TransparentActivity"></activity>
+        <activity
+            android:name=".activity.NewsContentActivity"
+            android:theme="@style/AppTheme.TransparentActivity"></activity>
     </application>
 
 </manifest>

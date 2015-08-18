@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ll"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#FFF0F0F0"
+    android:background="@color/light_news_item"
     android:orientation="vertical">
 
     <FrameLayout
@@ -12,7 +13,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginTop="8dp"
-        android:background="@drawable/item_background_selector"
+        android:background="@drawable/item_background_selector_light"
         android:orientation="horizontal">
 
         <RelativeLayout

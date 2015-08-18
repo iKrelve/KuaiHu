@@ -215,14 +215,14 @@ public class Kanner extends FrameLayout implements OnClickListener {
     }
 
     public interface OnItemClickListener {
-        public void click(Latest.TopStoriesEntity entity);
+        public void click(View v, Latest.TopStoriesEntity entity);
     }
 
     @Override
     public void onClick(View v) {
         if (mItemClickListener != null) {
             Latest.TopStoriesEntity entity = topStoriesEntities.get(vp.getCurrentItem() - 1);
-            mItemClickListener.click(entity);
+            mItemClickListener.click(v,entity);
         }
     }
 }

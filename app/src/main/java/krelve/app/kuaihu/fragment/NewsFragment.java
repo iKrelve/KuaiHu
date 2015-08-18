@@ -21,9 +21,12 @@ import org.apache.http.Header;
 import java.util.ArrayList;
 
 import krelve.app.kuaihu.R;
+import krelve.app.kuaihu.activity.LatestContentActivity;
 import krelve.app.kuaihu.activity.MainActivity;
+import krelve.app.kuaihu.activity.NewsContentActivity;
 import krelve.app.kuaihu.adapter.NewsItemAdapter;
 import krelve.app.kuaihu.model.News;
+import krelve.app.kuaihu.model.StoriesEntity;
 import krelve.app.kuaihu.util.Constant;
 import krelve.app.kuaihu.util.HttpUtils;
 
@@ -38,14 +41,18 @@ public class NewsFragment extends BaseFragment {
     private TextView tv_title;
     private String urlId;
     private News news;
+    private NewsItemAdapter mAdapter;
+    private String title;
 
 
-    public NewsFragment(String id) {
+    public NewsFragment(String id, String title) {
         urlId = id;
+        this.title = title;
     }
 
     @Override
     protected View initView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        ((MainActivity) mActivity).setToolbarTitle(title);
         View view = inflater.inflate(R.layout.news_layout, container, false);
         mImageLoader = ImageLoader.getInstance();
         lv_news = (ListView) view.findViewById(R.id.lv_news);
@@ -54,20 +61,23 @@ public class NewsFragment extends BaseFragment {
         iv_title = (ImageView) header.findViewById(R.id.iv_title);
         tv_title = (TextView) header.findViewById(R.id.tv_title);
         lv_news.addHeaderView(header);
-//        lv_news.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view,
-//                                    int position, long id) {
-//                NewsItem newsItem = (NewsItem) parent.getAdapter().getItem(
-//                        position);
-//                Intent intent = new Intent(getActivity(),
-//                        ThemeNewsContentActivity.class);
-//                intent.putExtra("id", newsItem.getId());
-//                intent.putExtra("title", newsItem.getTitle());
-//                startActivity(intent);
-//            }
-//        });
+        lv_news.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+                int[] startingLocation = new int[2];
+                view.getLocationOnScreen(startingLocation);
+                startingLocation[0] += view.getWidth() / 2;
+                StoriesEntity entity = (StoriesEntity) parent.getAdapter().getItem(position);
+                Intent intent = new Intent(mActivity, NewsContentActivity.class);
+                intent.putExtra(Constant.START_LOCATION, startingLocation);
+                intent.putExtra("entity", entity);
+                intent.putExtra("isLight", ((MainActivity) mActivity).isLight());
+                startActivity(intent);
+                mActivity.overridePendingTransition(0, 0);
+            }
+        });
         lv_news.setOnScrollListener(new AbsListView.OnScrollListener() {
 
             @Override
@@ -102,8 +112,13 @@ public class NewsFragment extends BaseFragment {
                 news = gson.fromJson(responseString, News.class);
                 tv_title.setText(news.getDescription());
                 mImageLoader.displayImage(news.getImage(), iv_title);
-                lv_news.setAdapter(new NewsItemAdapter(mActivity, news.getStories()));
+                mAdapter = new NewsItemAdapter(mActivity, news.getStories());
+                lv_news.setAdapter(mAdapter);
             }
         });
+    }
+
+    public void updateTheme() {
+        mAdapter.updateTheme();
     }
 }

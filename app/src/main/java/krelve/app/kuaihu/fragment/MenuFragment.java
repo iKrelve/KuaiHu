@@ -10,6 +10,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -31,16 +32,22 @@ import krelve.app.kuaihu.util.HttpUtils;
 
 public class MenuFragment extends BaseFragment implements OnClickListener {
     private ListView lv_item;
-    private TextView tv_download, tv_main;
+    private TextView tv_download, tv_main, tv_backup, tv_login;
+    private LinearLayout ll_menu;
     // private static String[] ITEMS = { "日常心理学", "用户推荐日报", "电影日报", "不许无聊",
     // "设计日报", "大公司日报", "财经日报", "互联网安全", "开始游戏", "音乐日报", "动漫日报", "体育日报" };
     private List<NewsListItem> items;
     private Handler handler = new Handler();
+    private boolean isLight;
+    private NewsTypeAdapter mAdapter;
 
 
     @Override
     protected View initView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.menu, container, false);
+        ll_menu = (LinearLayout) view.findViewById(R.id.ll_menu);
+        tv_login = (TextView) view.findViewById(R.id.tv_login);
+        tv_backup = (TextView) view.findViewById(R.id.tv_backup);
         tv_download = (TextView) view.findViewById(R.id.tv_download);
         tv_download.setOnClickListener(this);
         tv_main = (TextView) view.findViewById(R.id.tv_main);
@@ -56,7 +63,7 @@ public class MenuFragment extends BaseFragment implements OnClickListener {
                         .replace(
                                 R.id.fl_content,
                                 new NewsFragment(items.get(position)
-                                        .getId()), "news").commit();
+                                        .getId(), items.get(position).getTitle()), "news").commit();
                 ((MainActivity) mActivity).setCurId(items.get(position).getId());
                 ((MainActivity) mActivity).closeMenu();
             }
@@ -67,6 +74,7 @@ public class MenuFragment extends BaseFragment implements OnClickListener {
     @Override
     protected void initData() {
         super.initData();
+        isLight = ((MainActivity) mActivity).isLight();
         items = new ArrayList<NewsListItem>();
         HttpUtils.get(Constant.THEMES, new JsonHttpResponseHandler() {
             @Override
@@ -81,12 +89,9 @@ public class MenuFragment extends BaseFragment implements OnClickListener {
                         newsListItem.setId(itemObject.getString("id"));
                         items.add(newsListItem);
                     }
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            lv_item.setAdapter(new NewsTypeAdapter());
-                        }
-                    });
+                    mAdapter = new NewsTypeAdapter();
+                    lv_item.setAdapter(mAdapter);
+                    updateTheme();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -119,6 +124,7 @@ public class MenuFragment extends BaseFragment implements OnClickListener {
             }
             TextView tv_item = (TextView) convertView
                     .findViewById(R.id.tv_item);
+            tv_item.setTextColor(getResources().getColor(isLight ? R.color.light_menu_listview_textcolor : R.color.dark_menu_listview_textcolor));
             tv_item.setText(items.get(position).getTitle());
             return convertView;
         }
@@ -132,28 +138,16 @@ public class MenuFragment extends BaseFragment implements OnClickListener {
                 ((MainActivity) mActivity).closeMenu();
                 break;
         }
-//        switch (v.getId()) {
-//            case R.id.tv_download:
-//                String CurID = ((MainActivity) getActivity()).getCurID();
-//                List<NewsItem> newsItems = null;
-//                if (CurID.equals("news")) {
-//                    newsItems = ((NewsFragment) getFragmentManager()
-//                            .findFragmentByTag("news")).getNewsItems();
-//                } else {
-//                    newsItems = ((ThemeNewsFragment) getFragmentManager()
-//                            .findFragmentByTag("news")).getNewsItems();
-//                }
-//                Intent downLoadService = new Intent(getActivity(),
-//                        DownloadService.class);
-//                downLoadService.putExtra("news", (Serializable) newsItems);
-//                getActivity().startService(downLoadService);
-//                break;
-//            case R.id.tv_main:
-//                getFragmentManager().beginTransaction()
-//                        .replace(R.id.fl_content, new NewsFragment(), "news")
-//                        .commit();
-//                ((MainActivity) getActivity()).setCurID("news");
-//                ((MainActivity) getActivity()).toggle();
-//        }
+    }
+
+    public void updateTheme() {
+        isLight = ((MainActivity) mActivity).isLight();
+        ll_menu.setBackgroundColor(getResources().getColor(isLight ? R.color.light_menu_header : R.color.dark_menu_header));
+        tv_login.setTextColor(getResources().getColor(isLight ? R.color.light_menu_header_tv : R.color.dark_menu_header_tv));
+        tv_backup.setTextColor(getResources().getColor(isLight ? R.color.light_menu_header_tv : R.color.dark_menu_header_tv));
+        tv_download.setTextColor(getResources().getColor(isLight ? R.color.light_menu_header_tv : R.color.dark_menu_header_tv));
+        tv_main.setBackgroundColor(getResources().getColor(isLight ? R.color.light_menu_index_background : R.color.dark_menu_index_background));
+        lv_item.setBackgroundColor(getResources().getColor(isLight ? R.color.light_menu_listview_background : R.color.dark_menu_listview_background));
+        mAdapter.notifyDataSetChanged();
     }
 }
