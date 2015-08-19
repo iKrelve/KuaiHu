@@ -78,7 +78,8 @@ public class NewsContentActivity extends AppCompatActivity implements RevealBack
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, String responseString) {
                     SQLiteDatabase db = dbHelper.getWritableDatabase();
-                    db.execSQL("replace into Cache(newsId,json) values(" + entity.getId() + ",' " + responseString + "')");
+                    responseString = responseString.replaceAll("'", "''");
+                    db.execSQL("replace into Cache(newsId,json) values(" + entity.getId() + ",'" + responseString + "')");
                     db.close();
                     parseJson(responseString);
                 }
