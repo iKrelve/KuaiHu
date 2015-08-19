@@ -16,6 +16,7 @@ import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import krelve.app.kuaihu.model.Latest;
 public class Kanner extends FrameLayout implements OnClickListener {
     private List<Latest.TopStoriesEntity> topStoriesEntities;
     private ImageLoader mImageLoader;
+    private DisplayImageOptions options;
     private List<View> views;
     private Context context;
     private ViewPager vp;
@@ -42,6 +44,10 @@ public class Kanner extends FrameLayout implements OnClickListener {
     public Kanner(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mImageLoader = ImageLoader.getInstance();
+        options = new DisplayImageOptions.Builder()
+                .cacheInMemory(true)
+                .cacheOnDisk(true)
+                .build();
         this.context = context;
         this.topStoriesEntities = new ArrayList<>();
         initView();
@@ -98,13 +104,13 @@ public class Kanner extends FrameLayout implements OnClickListener {
             iv.setScaleType(ScaleType.CENTER_CROP);
 //            iv.setBackgroundResource(R.drawable.loading1);
             if (i == 0) {
-                mImageLoader.displayImage(topStoriesEntities.get(len - 1).getImage(), iv);
+                mImageLoader.displayImage(topStoriesEntities.get(len - 1).getImage(), iv, options);
                 tv_title.setText(topStoriesEntities.get(len - 1).getTitle());
             } else if (i == len + 1) {
-                mImageLoader.displayImage(topStoriesEntities.get(0).getImage(), iv);
+                mImageLoader.displayImage(topStoriesEntities.get(0).getImage(), iv, options);
                 tv_title.setText(topStoriesEntities.get(0).getTitle());
             } else {
-                mImageLoader.displayImage(topStoriesEntities.get(i - 1).getImage(), iv);
+                mImageLoader.displayImage(topStoriesEntities.get(i - 1).getImage(), iv, options);
                 tv_title.setText(topStoriesEntities.get(i - 1).getTitle());
             }
             fm.setOnClickListener(this);
@@ -222,7 +228,7 @@ public class Kanner extends FrameLayout implements OnClickListener {
     public void onClick(View v) {
         if (mItemClickListener != null) {
             Latest.TopStoriesEntity entity = topStoriesEntities.get(vp.getCurrentItem() - 1);
-            mItemClickListener.click(v,entity);
+            mItemClickListener.click(v, entity);
         }
     }
 }

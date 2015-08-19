@@ -19,6 +19,7 @@ import android.widget.FrameLayout;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
 
 import krelve.app.kuaihu.R;
+import krelve.app.kuaihu.db.CacheDbHelper;
 import krelve.app.kuaihu.fragment.MainFragment;
 import krelve.app.kuaihu.fragment.MenuFragment;
 import krelve.app.kuaihu.fragment.NewsFragment;
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private String curId;
     private Toolbar toolbar;
     private boolean isLight;
+    private CacheDbHelper dbHelper;
     private SharedPreferences sp;
 
 
@@ -40,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         sp = PreferenceManager.getDefaultSharedPreferences(this);
+        dbHelper = new CacheDbHelper(this, 1);
         isLight = sp.getBoolean("isLight", true);
         initView();
         loadLatest();
@@ -132,6 +135,10 @@ public class MainActivity extends AppCompatActivity {
 
     public boolean isLight() {
         return isLight;
+    }
+
+    public CacheDbHelper getCacheDbHelper() {
+        return dbHelper;
     }
 
     @Override

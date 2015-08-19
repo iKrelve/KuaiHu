@@ -2,7 +2,10 @@ package krelve.app.kuaihu.fragment;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +17,7 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.loopj.android.http.TextHttpResponseHandler;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 import org.apache.http.Header;
@@ -25,10 +29,12 @@ import krelve.app.kuaihu.activity.LatestContentActivity;
 import krelve.app.kuaihu.activity.MainActivity;
 import krelve.app.kuaihu.activity.NewsContentActivity;
 import krelve.app.kuaihu.adapter.NewsItemAdapter;
+import krelve.app.kuaihu.db.CacheDbHelper;
 import krelve.app.kuaihu.model.News;
 import krelve.app.kuaihu.model.StoriesEntity;
 import krelve.app.kuaihu.util.Constant;
 import krelve.app.kuaihu.util.HttpUtils;
+import krelve.app.kuaihu.util.PreUtils;
 
 /**
  * Created by wwjun.wang on 2015/8/14.
@@ -74,6 +80,24 @@ public class NewsFragment extends BaseFragment {
                 intent.putExtra(Constant.START_LOCATION, startingLocation);
                 intent.putExtra("entity", entity);
                 intent.putExtra("isLight", ((MainActivity) mActivity).isLight());
+
+                String readSequence = PreUtils.getStringFromDefault(mActivity, "read", "");
+                String[] splits = readSequence.split(",");
+                StringBuffer sb = new StringBuffer();
+                if (splits.length >= 200) {
+                    for (int i = 100; i < splits.length; i++) {
+                        sb.append(splits[i] + ",");
+                    }
+                    readSequence = sb.toString();
+                }
+
+                if (!readSequence.contains(entity.getId() + "")) {
+                    readSequence = readSequence + entity.getId() + ",";
+                }
+                PreUtils.putStringToDefault(mActivity, "read", readSequence);
+                TextView tv_title = (TextView) view.findViewById(R.id.tv_title);
+                tv_title.setTextColor(getResources().getColor(R.color.clicked_tv_textcolor));
+
                 startActivity(intent);
                 mActivity.overridePendingTransition(0, 0);
             }
@@ -100,22 +124,45 @@ public class NewsFragment extends BaseFragment {
     @Override
     protected void initData() {
         super.initData();
-        HttpUtils.get(Constant.THEMENEWS + urlId, new TextHttpResponseHandler() {
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+        if (HttpUtils.isNetworkConnected(mActivity)) {
+            HttpUtils.get(Constant.THEMENEWS + urlId, new TextHttpResponseHandler() {
+                @Override
+                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
 
-            }
+                }
 
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                Gson gson = new Gson();
-                news = gson.fromJson(responseString, News.class);
-                tv_title.setText(news.getDescription());
-                mImageLoader.displayImage(news.getImage(), iv_title);
-                mAdapter = new NewsItemAdapter(mActivity, news.getStories());
-                lv_news.setAdapter(mAdapter);
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, String responseString) {
+                    SQLiteDatabase db = ((MainActivity) mActivity).getCacheDbHelper().getWritableDatabase();
+                    db.execSQL("replace into CacheList(date,json) values(" + (Constant.BASE_COLUMN + Integer.parseInt(urlId)) + ",' " + responseString + "')");
+                    db.close();
+                    parseJson(responseString);
+                }
+            });
+        } else {
+            SQLiteDatabase db = ((MainActivity) mActivity).getCacheDbHelper().getReadableDatabase();
+            Cursor cursor = db.rawQuery("select * from CacheList where date = " + (Constant.BASE_COLUMN + Integer.parseInt(urlId)), null);
+            if (cursor.moveToFirst()) {
+                String json = cursor.getString(cursor.getColumnIndex("json"));
+                parseJson(json);
             }
-        });
+            cursor.close();
+            db.close();
+        }
+
+    }
+
+    private void parseJson(String responseString) {
+        Gson gson = new Gson();
+        news = gson.fromJson(responseString, News.class);
+        DisplayImageOptions options = new DisplayImageOptions.Builder()
+                .cacheInMemory(true)
+                .cacheOnDisk(true)
+                .build();
+        tv_title.setText(news.getDescription());
+        mImageLoader.displayImage(news.getImage(), iv_title, options);
+        mAdapter = new NewsItemAdapter(mActivity, news.getStories());
+        lv_news.setAdapter(mAdapter);
     }
 
     public void updateTheme() {

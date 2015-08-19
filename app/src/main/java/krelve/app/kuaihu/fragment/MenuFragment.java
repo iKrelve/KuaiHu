@@ -1,7 +1,10 @@
 package krelve.app.kuaihu.fragment;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -29,6 +32,7 @@ import krelve.app.kuaihu.activity.MainActivity;
 import krelve.app.kuaihu.model.NewsListItem;
 import krelve.app.kuaihu.util.Constant;
 import krelve.app.kuaihu.util.HttpUtils;
+import krelve.app.kuaihu.util.PreUtils;
 
 public class MenuFragment extends BaseFragment implements OnClickListener {
     private ListView lv_item;
@@ -76,27 +80,44 @@ public class MenuFragment extends BaseFragment implements OnClickListener {
         super.initData();
         isLight = ((MainActivity) mActivity).isLight();
         items = new ArrayList<NewsListItem>();
-        HttpUtils.get(Constant.THEMES, new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                super.onSuccess(statusCode, headers, response);
-                try {
-                    JSONArray itemsArray = response.getJSONArray("others");
-                    for (int i = 0; i < itemsArray.length(); i++) {
-                        NewsListItem newsListItem = new NewsListItem();
-                        JSONObject itemObject = itemsArray.getJSONObject(i);
-                        newsListItem.setTitle(itemObject.getString("name"));
-                        newsListItem.setId(itemObject.getString("id"));
-                        items.add(newsListItem);
-                    }
-                    mAdapter = new NewsTypeAdapter();
-                    lv_item.setAdapter(mAdapter);
-                    updateTheme();
-                } catch (JSONException e) {
-                    e.printStackTrace();
+        if (HttpUtils.isNetworkConnected(mActivity)) {
+            HttpUtils.get(Constant.THEMES, new JsonHttpResponseHandler() {
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    super.onSuccess(statusCode, headers, response);
+                    String json = response.toString();
+                    PreUtils.putStringToDefault(mActivity, Constant.THEMES, json);
+                    parseJson(response);
                 }
+            });
+        } else {
+            String json = PreUtils.getStringFromDefault(mActivity, Constant.THEMES, "");
+            try {
+                JSONObject jsonObject = new JSONObject(json);
+                parseJson(jsonObject);
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-        });
+        }
+
+    }
+
+    private void parseJson(JSONObject response) {
+        try {
+            JSONArray itemsArray = response.getJSONArray("others");
+            for (int i = 0; i < itemsArray.length(); i++) {
+                NewsListItem newsListItem = new NewsListItem();
+                JSONObject itemObject = itemsArray.getJSONObject(i);
+                newsListItem.setTitle(itemObject.getString("name"));
+                newsListItem.setId(itemObject.getString("id"));
+                items.add(newsListItem);
+            }
+            mAdapter = new NewsTypeAdapter();
+            lv_item.setAdapter(mAdapter);
+            updateTheme();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     public class NewsTypeAdapter extends BaseAdapter {

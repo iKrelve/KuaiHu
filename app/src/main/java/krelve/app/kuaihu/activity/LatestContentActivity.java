@@ -1,5 +1,7 @@
 package krelve.app.kuaihu.activity;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
@@ -8,17 +10,20 @@ import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.loopj.android.http.TextHttpResponseHandler;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 import org.apache.http.Header;
 
 import krelve.app.kuaihu.R;
+import krelve.app.kuaihu.db.WebCacheDbHelper;
 import krelve.app.kuaihu.model.Content;
 import krelve.app.kuaihu.model.StoriesEntity;
 import krelve.app.kuaihu.util.Constant;
@@ -35,12 +40,14 @@ public class LatestContentActivity extends AppCompatActivity implements RevealBa
     private ImageView iv;
     private RevealBackgroundView vRevealBackground;
     private CoordinatorLayout coordinatorLayout;
+    private WebCacheDbHelper dbHelper;
     private boolean isLight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.latest_content_layout);
+        dbHelper = new WebCacheDbHelper(this, 1);
         isLight = getIntent().getBooleanExtra("isLight", true);
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
         coordinatorLayout.setVisibility(View.INVISIBLE);
@@ -62,25 +69,54 @@ public class LatestContentActivity extends AppCompatActivity implements RevealBa
         mCollapsingToolbarLayout.setContentScrimColor(getResources().getColor(isLight ? R.color.light_toolbar : R.color.dark_toolbar));
         mWebView = (WebView) findViewById(R.id.webview);
         mWebView.getSettings().setJavaScriptEnabled(true);
-        HttpUtils.get(Constant.CONTENT + entity.getId(), new TextHttpResponseHandler() {
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+        mWebView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        // 开启DOM storage API 功能
+        mWebView.getSettings().setDomStorageEnabled(true);
+        // 开启database storage API功能
+        mWebView.getSettings().setDatabaseEnabled(true);
+        // 开启Application Cache功能
+        mWebView.getSettings().setAppCacheEnabled(true);
+        if (HttpUtils.isNetworkConnected(this)) {
+            HttpUtils.get(Constant.CONTENT + entity.getId(), new TextHttpResponseHandler() {
+                @Override
+                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
 
-            }
+                }
 
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                Gson gson = new Gson();
-                content = gson.fromJson(responseString, Content.class);
-                final ImageLoader imageloader = ImageLoader.getInstance();
-                imageloader.displayImage(content.getImage(), iv);
-                String css = "<link rel=\"stylesheet\" href=\"file:///android_asset/css/news.css\" type=\"text/css\">";
-                String html = "<html><head>" + css + "</head><body>" + content.getBody() + "</body></html>";
-                html = html.replace("<div class=\"img-place-holder\">", "");
-                mWebView.loadDataWithBaseURL("x-data://base", html, "text/html", "UTF-8", null);
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, String responseString) {
+                    SQLiteDatabase db = dbHelper.getWritableDatabase();
+                    db.execSQL("replace into Cache(newsId,json) values(" + entity.getId() + ",' " + responseString + "')");
+                    db.close();
+                    parseJson(responseString);
+                }
+            });
+        } else {
+            SQLiteDatabase db = dbHelper.getReadableDatabase();
+            Cursor cursor = db.rawQuery("select * from Cache where newsId = " + entity.getId(), null);
+            if (cursor.moveToFirst()) {
+                String json = cursor.getString(cursor.getColumnIndex("json"));
+                parseJson(json);
             }
-        });
+            cursor.close();
+            db.close();
+        }
         setupRevealBackground(savedInstanceState);
+    }
+
+    private void parseJson(String responseString) {
+        Gson gson = new Gson();
+        content = gson.fromJson(responseString, Content.class);
+        final ImageLoader imageloader = ImageLoader.getInstance();
+        DisplayImageOptions options = new DisplayImageOptions.Builder()
+                .cacheInMemory(true)
+                .cacheOnDisk(true)
+                .build();
+        imageloader.displayImage(content.getImage(), iv, options);
+        String css = "<link rel=\"stylesheet\" href=\"file:///android_asset/css/news.css\" type=\"text/css\">";
+        String html = "<html><head>" + css + "</head><body>" + content.getBody() + "</body></html>";
+        html = html.replace("<div class=\"img-place-holder\">", "");
+        mWebView.loadDataWithBaseURL("x-data://base", html, "text/html", "UTF-8", null);
     }
 
 
@@ -111,6 +147,6 @@ public class LatestContentActivity extends AppCompatActivity implements RevealBa
     @Override
     public void onBackPressed() {
         finish();
-        overridePendingTransition(0, R.anim.slide_out_to_left);
+        overridePendingTransition(0, R.anim.slide_out_to_left_from_right);
     }
 }

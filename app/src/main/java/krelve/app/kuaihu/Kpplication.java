@@ -2,6 +2,7 @@ package krelve.app.kuaihu;
 
 import android.app.Application;
 import android.content.Context;
+import android.media.Image;
 
 import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiskCache;
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
@@ -27,7 +28,7 @@ public class Kpplication extends Application {
 
     private void initImageLoader(Context context) {
         File cacheDir = StorageUtils.getCacheDirectory(context);
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
+/*        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
                 context).threadPoolSize(3)
                 .threadPriority(Thread.NORM_PRIORITY - 2)
                 .memoryCache(new LruMemoryCache(2 * 1024 * 1024))
@@ -35,7 +36,8 @@ public class Kpplication extends Application {
                 .diskCacheFileNameGenerator(new Md5FileNameGenerator())
                 .tasksProcessingOrder(QueueProcessingType.LIFO)
                 .diskCache(new UnlimitedDiskCache(cacheDir)).writeDebugLogs()
-                .build();
+                .build();*/
+        ImageLoaderConfiguration config = ImageLoaderConfiguration.createDefault(context);
         ImageLoader.getInstance().init(config);
     }
 }

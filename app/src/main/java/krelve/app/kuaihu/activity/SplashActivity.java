@@ -41,6 +41,7 @@ public class SplashActivity extends Activity {
         iv_start = (ImageView) findViewById(R.id.iv_start);
         initImage();
 
+
     }
 
     private void initImage() {
@@ -65,35 +66,40 @@ public class SplashActivity extends Activity {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                HttpUtils.get(Constant.START, new AsyncHttpResponseHandler() {
-                    @Override
-                    public void onSuccess(int i, Header[] headers, byte[] bytes) {
-                        try {
-                            JSONObject jsonObject = new JSONObject(new String(bytes));
-                            String url = jsonObject.getString("img");
-                            HttpUtils.getImage(url, new BinaryHttpResponseHandler() {
-                                @Override
-                                public void onSuccess(int i, Header[] headers, byte[] bytes) {
-                                    saveImage(imgFile, bytes);
-                                    startActivity();
-                                }
+                if (HttpUtils.isNetworkConnected(SplashActivity.this)) {
+                    HttpUtils.get(Constant.START, new AsyncHttpResponseHandler() {
+                        @Override
+                        public void onSuccess(int i, Header[] headers, byte[] bytes) {
+                            try {
+                                JSONObject jsonObject = new JSONObject(new String(bytes));
+                                String url = jsonObject.getString("img");
+                                HttpUtils.getImage(url, new BinaryHttpResponseHandler() {
+                                    @Override
+                                    public void onSuccess(int i, Header[] headers, byte[] bytes) {
+                                        saveImage(imgFile, bytes);
+                                        startActivity();
+                                    }
 
-                                @Override
-                                public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable) {
-                                    startActivity();
-                                }
-                            });
+                                    @Override
+                                    public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable) {
+                                        startActivity();
+                                    }
+                                });
 
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
                         }
-                    }
 
-                    @Override
-                    public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable) {
-                        startActivity();
-                    }
-                });
+                        @Override
+                        public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable) {
+                            startActivity();
+                        }
+                    });
+                } else {
+                    Toast.makeText(SplashActivity.this, "没有网络连接!", Toast.LENGTH_LONG).show();
+                    startActivity();
+                }
             }
 
             @Override
