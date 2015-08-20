@@ -21,15 +21,18 @@
 * 文章浏览到底部时自动加载更多
 * 标记已读文章
 * 自动缓存文章
-* 夜间模式
+* 夜间模式  
+
 ###依赖的开源项目
 [Gson](https://github.com/google/gson "Gson")  
 [Android-Universal-Image-Loader](https://github.com/nostra13/Android-Universal-Image-Loader "Android-Universal-Image-Loader")  
 [android-async-http](https://github.com/loopj/android-async-http "android-async-http")  
+
 ###依赖的官方支持包
 * **com.android.support:support-v4:22.2.1**
 * **com.android.support:appcompat-v7:22.2.1**
-* **com.android.support:design:22.2.1**
+* **com.android.support:design:22.2.1**  
+
 ###亮点
 * **Android Design Support Library的使用**
 	* Snackbar
@@ -37,7 +40,7 @@
 	* AppBarLayout
 	* CollapsingToolbarLayout
 * **Activity切换的Reveal效果** 
-	* [来自InstaMaterial](https://github.com/frogermcs/InstaMaterial "InstaMaterial")
+	* [来自InstaMaterial](https://github.com/frogermcs/InstaMaterial "InstaMaterial")  
 	
 ###效果
 ![](http://7xjs0n.com1.z0.glb.clouddn.com/zhihu_final.gif)
