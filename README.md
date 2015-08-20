@@ -1,6 +1,6 @@
 ##高仿知乎日报
 ###APK下载
-[高仿知乎日报](http://pan.baidu.com/s/1nt1RI7B "高仿知乎日报") 或 [高仿知乎日报](http://download.csdn.net/detail/wo350546294/9029347 "高仿知乎日报")
+[百度网盘](http://pan.baidu.com/s/1nt1RI7B "高仿知乎日报") 或 [CSDN](http://download.csdn.net/detail/wo350546294/9029347 "高仿知乎日报")
 ###教程
 [高仿知乎日报(一)](http://krelve.com/android/123.html "高仿知乎日报(一)")  
 [高仿知乎日报(二)](http://krelve.com/android/125.html "高仿知乎日报(二)")  
