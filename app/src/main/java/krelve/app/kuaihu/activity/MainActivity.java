@@ -108,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        menu.getItem(0).setTitle(sp.getBoolean("isLight",true)?"夜间模式":"日间模式");
         return true;
     }
 
@@ -116,6 +117,8 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
         if (id == R.id.action_mode) {
             isLight = !isLight;
+            // TODO: 15-8-29 现在只有这个activity有夜间模式，打开日报详情还不是啊
+            item.setTitle(isLight?"夜间模式":"日间模式");
             toolbar.setBackgroundColor(getResources().getColor(isLight ? R.color.light_toolbar : R.color.dark_toolbar));
             if (curId.equals("latest")) {
                 ((MainFragment) getSupportFragmentManager().findFragmentByTag("latest")).updateTheme();
@@ -123,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
                 ((NewsFragment) getSupportFragmentManager().findFragmentByTag("news")).updateTheme();
             }
             ((MenuFragment) getSupportFragmentManager().findFragmentById(R.id.menu_fragment)).updateTheme();
-            sp.edit().putBoolean("isLight", isLight).commit();
+            sp.edit().putBoolean("isLight", isLight).apply();
         }
 
         return super.onOptionsItemSelected(item);
