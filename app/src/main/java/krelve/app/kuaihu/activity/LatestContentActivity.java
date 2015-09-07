@@ -1,19 +1,22 @@
 package krelve.app.kuaihu.activity;
 
+import android.annotation.TargetApi;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.Window;
+import android.view.WindowManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.loopj.android.http.TextHttpResponseHandler;
@@ -39,7 +42,7 @@ public class LatestContentActivity extends AppCompatActivity implements RevealBa
     private Content content;
     private ImageView iv;
     private RevealBackgroundView vRevealBackground;
-    private CoordinatorLayout coordinatorLayout;
+    private AppBarLayout mAppBarLayout;
     private WebCacheDbHelper dbHelper;
     private boolean isLight;
 
@@ -49,8 +52,8 @@ public class LatestContentActivity extends AppCompatActivity implements RevealBa
         setContentView(R.layout.latest_content_layout);
         dbHelper = new WebCacheDbHelper(this, 1);
         isLight = getIntent().getBooleanExtra("isLight", true);
-        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
-        coordinatorLayout.setVisibility(View.INVISIBLE);
+        mAppBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
+        mAppBarLayout.setVisibility(View.INVISIBLE);
         vRevealBackground = (RevealBackgroundView) findViewById(R.id.revealBackgroundView);
         entity = (StoriesEntity) getIntent().getSerializableExtra("entity");
         iv = (ImageView) findViewById(R.id.iv);
@@ -67,6 +70,7 @@ public class LatestContentActivity extends AppCompatActivity implements RevealBa
         CollapsingToolbarLayout mCollapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar_layout);
         mCollapsingToolbarLayout.setTitle(entity.getTitle());
         mCollapsingToolbarLayout.setContentScrimColor(getResources().getColor(isLight ? R.color.light_toolbar : R.color.dark_toolbar));
+        mCollapsingToolbarLayout.setStatusBarScrimColor(getResources().getColor(isLight ? R.color.light_toolbar : R.color.dark_toolbar));
         mWebView = (WebView) findViewById(R.id.webview);
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
@@ -103,6 +107,7 @@ public class LatestContentActivity extends AppCompatActivity implements RevealBa
             db.close();
         }
         setupRevealBackground(savedInstanceState);
+        setStatusBarColor(getResources().getColor(isLight ? R.color.light_toolbar : R.color.dark_toolbar));
     }
 
     private void parseJson(String responseString) {
@@ -141,7 +146,8 @@ public class LatestContentActivity extends AppCompatActivity implements RevealBa
     @Override
     public void onStateChange(int state) {
         if (RevealBackgroundView.STATE_FINISHED == state) {
-            coordinatorLayout.setVisibility(View.VISIBLE);
+            mAppBarLayout.setVisibility(View.VISIBLE);
+            setStatusBarColor(Color.TRANSPARENT);
         }
     }
 
@@ -149,5 +155,20 @@ public class LatestContentActivity extends AppCompatActivity implements RevealBa
     public void onBackPressed() {
         finish();
         overridePendingTransition(0, R.anim.slide_out_to_left_from_right);
+    }
+
+    @TargetApi(21)
+    private void setStatusBarColor(int statusBarColor) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            // If both system bars are black, we can remove these from our layout,
+            // removing or shrinking the SurfaceFlinger overlay required for our views.
+            Window window = this.getWindow();
+            if (statusBarColor == Color.BLACK && window.getNavigationBarColor() == Color.BLACK) {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            } else {
+                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            }
+            window.setStatusBarColor(statusBarColor);
+        }
     }
 }
